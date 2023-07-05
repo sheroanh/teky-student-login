@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "TEKY Student Login",
+  "description": "Giúp đăng nhập LMS của học sinh một cách dễ dàng hơn",
+  "version": "1.0",
+  "icons": {
+    "128": "128.png"
+  },
+  "background": {
+    "service_worker": "background-wrapper.js"
+  },
+  "author": "aitstudio",
+  "action": {
+    "default_title": "TEKY Student Login",
+    "default_popup": "popup.html"
+  },
+  "host_permissions": ["*://*.teky.edu.vn/*"],
+  "permissions": ["cookies", "tabs", "notifications", "storage", "alarms"]
+}
