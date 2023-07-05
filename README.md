@@ -15,6 +15,7 @@ Phần mở rộng tương thích hầu hết các trình duyệt nhân Chromium
 ## Nhật ký phiên bản
 Phiên bản 1.0: 
 - Hỗ trợ (bật/tắt) tính năng năng đăng xuất khi đăng nhập QR Code
+
 Phiên bản 1.1:
 - Hỗ trợ (bật/tắt) tính năng chuyển tiếp sau khi đăng nhập thành công
 - Hỗ trợ tính năng chọn trang chuyển tiếp sau khi đăng nhập thành công
