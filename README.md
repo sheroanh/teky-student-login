@@ -24,6 +24,9 @@ Phần mở rộng tương thích hầu hết các trình duyệt nhân Chromium
 - Hỗ trợ (bật/tắt) tính năng chuyển tiếp sau khi đăng nhập thành công
 - Hỗ trợ tính năng chọn trang chuyển tiếp sau khi đăng nhập thành công
 
+#### Phiên bản 1.2 (05/07/2023):
+- Sửa lỗi không lưu lại tuỳ chọn
+
 ## FAQ
 **1. Tại sao phần mở rộng lại không xuất bản lên Cửa hàng Chrome trực tuyến hay các cửa hàng cung cấp phần mở rộng? Công nghệ phát triển phần mở rộng là gì?**
 - Phần mở rộng hướng đến phạm vi nhỏ, là cộng đồng giảng viên làm việc tại TEKY. Ngoài ra, khi xuất bản lên Cửa hàng Chrome trực tuyến cũng mất một khoản phí nhỏ.

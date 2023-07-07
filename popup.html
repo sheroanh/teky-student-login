@@ -97,9 +97,23 @@
     p {
       margin: 0;
     }
+
+    .loading {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.5);
+      top: 0;
+      left: 0;
+    }
   </style>
 </head>
 <body>
+  <!-- <div id="loading-wrapper" class="loading flex center">
+    <p>Đang tải</p>
+  </div> -->
   <div class="container">
     <div class="center">
       <img src="./128.png" alt="teky-logo" />
@@ -128,7 +142,7 @@
     <div class="flex center btn-group">
       <button id="btn-qr-login">QR Login </button>
     </div>
-    <p class="copyright">Version 1.1</br>From NTA - TEKY Center 3 with ❤️</p>
+    <p class="copyright">Version 1.2</br>From NTA - TEKY Center 3 with ❤️</p>
     <a class="copyright" href="https://github.com/sheroanh/teky-student-login"
       target="_blank">Github Repo</a>
     <script src="./action.js"></script>

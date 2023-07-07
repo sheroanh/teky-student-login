@@ -12,17 +12,27 @@ let urlRedirectPath = {
   3: urlClass,
 };
 
-let logout = true;
-let autoRedirectAfterLogin = false;
-let selectedRedirectPath = 0;
+const data = {};
 
-function sendNotification(title, message, iconUrl = "./icons/icon.png") {
-  chrome.notifications.create({
-    type: "basic",
-    iconUrl: iconUrl,
-    title: title,
-    message: message,
-    priority: 1,
+const getStorage = (key = null) =>
+  chrome.storage.sync
+    .get(key || ["logout", "autoRedirectAfterLogin", "selectedRedirectPath"])
+    .then((items) => {
+      console.log("Đã lấy dữ liệu", items);
+      Object.assign(data, items);
+    });
+
+async function setStorage(
+  object = {
+    logout: true,
+    autoRedirectAfterLogin: false,
+    selectedRedirectPath: 0,
+  }
+) {
+  console.log("Đang lưu dữ liệu: ", object);
+  await chrome.storage.sync.set(object, () => {
+    console.log("đã lưu ");
+    return true;
   });
 }
 
@@ -30,20 +40,19 @@ function redirect(url = urlQrLogin) {
   chrome.tabs.update({ url: url });
 }
 
-function onError(error) {
-  console.log(`Lỗi: ${error}`);
-}
-
 function afterLogin(tabId, info, tab) {
   if (tab.url.match("teky.edu.vn/lop-hoc/") && info.status === "loading") {
-    redirect(urlRedirectPath[selectedRedirectPath]);
-    chrome.tabs.onUpdated.removeListener(afterLogin);
+    getStorage().then(() => {
+      redirect(urlRedirectPath[data.selectedRedirectPath]);
+      chrome.tabs.onUpdated.removeListener(afterLogin);
+    });
+
     return;
   }
 }
 
 async function removeCookie() {
-  if (logout)
+  if (data.logout)
     chrome.cookies.getAll({ url: url }).then(function (cookies) {
       return Promise.all(
         cookies.map(function (cookie) {
@@ -53,53 +62,117 @@ async function removeCookie() {
     });
 }
 
-chrome.action.onClicked.addListener();
-chrome.runtime.onMessage.addListener(async function (
-  request,
-  sender,
-  sendResponse
-) {
+async function handleRequest(request, sender, sendResponse) {
   switch (request.message) {
     case "actionQrLogin":
       await removeCookie();
       redirect(urlQrLogin);
       sendResponse({ data: "", message: "success" });
-      if (autoRedirectAfterLogin) chrome.tabs.onUpdated.addListener(afterLogin);
+      if (data?.autoRedirectAfterLogin)
+        chrome.tabs.onUpdated.addListener(afterLogin);
       break;
     case "getLogout":
-      sendResponse({ data: logout, message: "success" });
+      sendResponse({ data: data?.logout, message: "success" });
       break;
     case "setLogout":
-      logout = request.data || false;
-      sendResponse({
-        data: logout,
-        message: logout
-          ? "Đã bật tự động đăng xuất"
-          : "Đã tắt tự động đăng xuất",
-      });
+      await setStorage({ ...data, logout: request?.data });
+      getStorage().then(() =>
+        sendResponse({
+          data: data?.logout,
+          message: data?.logout
+            ? "Đã bật tự động đăng xuất"
+            : "Đã tắt tự động đăng xuất",
+        })
+      );
       break;
     case "getAutoRedirectAfterLogin":
-      sendResponse({ data: autoRedirectAfterLogin, message: "success" });
+      sendResponse({
+        data: data?.autoRedirectAfterLogin,
+        message: "success",
+      });
       break;
     case "setAutoRedirectAfterLogin":
-      autoRedirectAfterLogin = request.data || false;
-      sendResponse({
-        data: autoRedirectAfterLogin,
-        message: autoRedirectAfterLogin
-          ? "Đã bật tự động chuyển hướng sau khi đăng nhập"
-          : "Đã tắt tự động chuyển hướng sau khi đăng nhập",
+      setStorage({
+        ...data,
+        autoRedirectAfterLogin: request?.data,
       });
+      getStorage().then(() =>
+        sendResponse({
+          data: data?.autoRedirectAfterLogin,
+          message: data?.autoRedirectAfterLogin
+            ? "Đã bật tự động chuyển hướng sau khi đăng nhập"
+            : "Đã tắt tự động chuyển hướng sau khi đăng nhập",
+        })
+      );
       break;
     case "getRedirectPath":
-      sendResponse({ data: selectedRedirectPath, message: "success" });
+      sendResponse({ data: data?.selectedRedirectPath, message: "success" });
       break;
     case "setRedirectPath":
-      selectedRedirectPath = request.data || 0;
-      sendResponse({
-        data: selectedRedirectPath,
-        message: "Đã cập nhật đường dẫn chuyển hướng",
+      setStorage({
+        ...data,
+        selectedRedirectPath: request?.data,
       });
+      getStorage().then(() =>
+        sendResponse({
+          data: data?.selectedRedirectPath,
+          message: "Đã cập nhật đường dẫn chuyển hướng",
+        })
+      );
     default:
       break;
+  }
+}
+
+// chrome.action.onClicked.addListener(async function (tab) {
+//   try {
+
+//   } catch (error) {
+//     console.log(error);
+//     if (chrome.runtime.lastError) {
+//       console.log(chrome.runtime.lastError.message);
+//     }
+//   }
+// });
+
+async function handleConnect(port) {
+  console.log("Connected: " + port.name);
+  if (port.name === "popup") {
+    if (
+      data == {} ||
+      !data?.logout ||
+      !data?.autoRedirectAfterLogin ||
+      !data?.selectedRedirectPath
+    )
+      await setStorage();
+    try {
+      await getStorage();
+    } catch (e) {
+      console.log(e);
+    }
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      handleRequest(request, sender, sendResponse);
+      return true;
+    });
+    port.onDisconnect.addListener(function () {
+      chrome.runtime.onMessage.removeListener(handleRequest);
+      console.log("popup has been closed");
+    });
+  }
+}
+
+chrome.runtime.onInstalled.addListener(async function (details) {
+  if (details.reason == "install") {
+    chrome.storage.sync.clear().then(async () => {
+      console.log("Đã xóa dữ liệu");
+      await setStorage();
+      chrome.runtime.onConnect.addListener(handleConnect);
+    });
+  } else if (details.reason == "update") {
+    chrome.storage.sync.clear().then(async () => {
+      console.log("Đã xóa dữ liệu");
+      await setStorage();
+      chrome.runtime.onConnect.addListener(handleConnect);
+    });
   }
 });
