@@ -109,11 +109,12 @@
       left: 0;
     }
   </style>
+  <script src="./action.js"></script>
 </head>
 <body>
-  <!-- <div id="loading-wrapper" class="loading flex center">
+  <div id="loading-wrapper" class="loading flex center">
     <p>Đang tải</p>
-  </div> -->
+  </div>
   <div class="container">
     <div class="center">
       <img src="./128.png" alt="teky-logo" />
@@ -122,15 +123,15 @@
     <div class="option-group block">
       <p class="font-bold">Tuỳ chọn:</p>
       <label class="flex start checkbox">
-        <input id="logout" type="checkbox" />
+        <input id="logout" type="checkbox" disabled="true"/>
         <span>Đăng xuất</span>
       </label>
       <div classname="block">
         <label class="flex start checkbox">
-          <input id="auto-redirect-after-login" type="checkbox" />
+          <input id="auto-redirect-after-login" type="checkbox" disabled="true"/>
           <span>Chuyển tiếp sau khi đăng nhập:</span>
         </label>
-        <select id="redirect-path" title="Tự động chuyển tiếp sau khi đăng nhập">
+        <select id="redirect-path" title="Tự động chuyển tiếp sau khi đăng nhập" disabled="true">
           <option value="0">Trang chủ</option>
           <option value="1">Dự án của em</option>
           <option value="2">Luyện tập</option>
@@ -145,7 +146,7 @@
     <p class="copyright">Version 1.2</br>From NTA - TEKY Center 3 with ❤️</p>
     <a class="copyright" href="https://github.com/sheroanh/teky-student-login"
       target="_blank">Github Repo</a>
-    <script src="./action.js"></script>
+    
   </div>
 </body>
 

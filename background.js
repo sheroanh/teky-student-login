@@ -138,13 +138,6 @@ async function handleRequest(request, sender, sendResponse) {
 async function handleConnect(port) {
   console.log("Connected: " + port.name);
   if (port.name === "popup") {
-    if (
-      data == {} ||
-      !data?.logout ||
-      !data?.autoRedirectAfterLogin ||
-      !data?.selectedRedirectPath
-    )
-      await setStorage();
     try {
       await getStorage();
     } catch (e) {
@@ -154,10 +147,6 @@ async function handleConnect(port) {
       handleRequest(request, sender, sendResponse);
       return true;
     });
-    port.onDisconnect.addListener(function () {
-      chrome.runtime.onMessage.removeListener(handleRequest);
-      console.log("popup has been closed");
-    });
   }
 }
 
@@ -166,13 +155,13 @@ chrome.runtime.onInstalled.addListener(async function (details) {
     chrome.storage.sync.clear().then(async () => {
       console.log("Đã xóa dữ liệu");
       await setStorage();
-      chrome.runtime.onConnect.addListener(handleConnect);
     });
   } else if (details.reason == "update") {
     chrome.storage.sync.clear().then(async () => {
       console.log("Đã xóa dữ liệu");
       await setStorage();
-      chrome.runtime.onConnect.addListener(handleConnect);
     });
   }
 });
+
+chrome.runtime.onConnect.addListener(handleConnect);
